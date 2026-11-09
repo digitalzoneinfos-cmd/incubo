@@ -1,0 +1,17 @@
+Dépose ici les photos en JPG. Elles s'affichent automatiquement dans l'app.
+
+Photos des articles / événements : <identifiant>.jpg
+  a1 Semaine de l'entrepreneuriat 2025 (conférences du 19/11/2025)
+  a2 Signature des trois conventions (17/11/2025)
+  a3 Table ronde économie durable (17/11/2025)
+  a4 Guide « Un diplôme – Une startup »
+  c1 Prix de l'étudiant entrepreneur     c2 Meilleure idée de startup
+  n1 Dépose ton projet     n2 Master Contrôle des drones     n3 Séance avec l'incubateur numérique
+  i1 L'incubateur en bref  i2 Réseau national des incubateurs   i3 Contact / bâtiment
+  e1..e4 événements de l'agenda        f1..f4 formations
+
+Galerie : g1.jpg (photo de couverture), puis g1-2.jpg ... g1-6.jpg pour l'album
+  g1 Conférence Pr Aït Oukach   g2 Signature CARRAVIC   g3 Annonce du Prix   g4 Table ronde
+  g5 Convention centre Yildiz    g6 Conférence ANADE     g7 Incubateur numérique   g8 Master drones
+
+Conseil : format paysage, environ 1200 px de large, moins de 300 Ko par photo.

@@ -1,7 +1,7 @@
 // Service worker : l'app s'ouvre même hors connexion.
 // Pages et scripts : réseau d'abord (pour recevoir les mises à jour et config.js), cache en secours.
 // Images et vidéos : cache d'abord.
-const CACHE = 'incubo-v3';
+const CACHE = 'incubo-v4';
 const ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });

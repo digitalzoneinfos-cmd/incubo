@@ -1,0 +1,30 @@
+{
+  "name": "Incubo — Incubateur de l'Université de Bouira",
+  "short_name": "Incubo",
+  "description": "Événements, formations, concours et questions de l'incubateur.",
+  "lang": "fr",
+  "start_url": "/#accueil",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F7F80",
+  "theme_color": "#0F7F80",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

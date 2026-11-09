@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<script>try{var _t=localStorage.getItem("incubo:theme");if(_t==="dark"||_t==="light")document.documentElement.dataset.theme=_t}catch(e){}</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="icons/icon-192.png">
@@ -64,6 +66,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
 .login-err{min-height:20px;font-size:13px;color:var(--bad)}
+.autotr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:-4px 0 14px;font-size:12.5px;color:var(--muted)}
 .secnote{font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
 
 /* ---------- coque ---------- */
@@ -360,6 +363,8 @@ table.t{width:100%;border-collapse:collapse;min-width:720px}
   <symbol id="i-net" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M11 7.3 6.2 15.8M13 7.3l4.8 8.5M7.5 18h9"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
   <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
 </svg>
@@ -383,7 +388,7 @@ table.t{width:100%;border-collapse:collapse;min-width:720px}
       <div class="fld"><label for="lgUser">Identifiant</label><input class="f" id="lgUser" autocomplete="username" placeholder="Identifiant" autocapitalize="none" spellcheck="false"></div>
       <div class="fld"><label for="lgPass">Mot de passe</label><div class="pw"><input class="f" id="lgPass" type="password" autocomplete="current-password" placeholder="Mot de passe"><button type="button" id="lgEye" aria-label="Afficher le mot de passe"><svg class="i"><use href="#i-eye"/></svg></button></div></div>
       <div class="login-err" id="lgErr" role="alert"></div>
-      <button class="btn pri" type="submit" style="padding:13px"><svg class="i"><use href="#i-lock"/></svg>Se connecter</button>
+      <button class="btn pri" type="submit" id="lgBtn" style="padding:13px"><svg class="i"><use href="#i-lock"/></svg>Se connecter</button>
       <p class="secnote">Session fermée automatiquement après 30 minutes d'inactivité. Après 5 essais incorrects, la connexion est bloquée pendant 1 minute.</p>
     </form>
   </div>
@@ -419,6 +424,7 @@ table.t{width:100%;border-collapse:collapse;min-width:720px}
       <button class="iconbtn burger" id="burger" aria-label="Menu"><svg class="i"><use href="#i-menu"/></svg></button>
       <button class="search-btn" id="openCmd"><svg class="i"><use href="#i-search"/></svg><span>Rechercher une startup, un inscrit, une publication…</span><kbd>Ctrl K</kbd></button>
       <span class="pill" id="backendPill"><i></i><span class="lbl" id="backendLbl"></span></span>
+      <button class="iconbtn" id="btnTheme" aria-label="Mode sombre"><svg class="i"><use href="#i-moon"/></svg></button>
       <button class="btn pri" id="quickAdd"><svg class="i"><use href="#i-plus"/></svg><span>Créer</span></button>
     </div>
     <div id="view" class="view"></div>
@@ -852,17 +858,20 @@ let ed=null;
 function openEditor(c,rec){
   const S=SCH[c];const isNew=!rec;const data=JSON.parse(JSON.stringify(rec||S.defaults?.()||{}));
   S.fields.forEach(f=>{if(f.k&&data[f.k]===undefined&&f.def!==undefined)data[f.k]=f.def});
-  ed={c,data,isNew,lang:'fr'};
+  ed={c,data,isNew,lang:'fr',orig:JSON.parse(JSON.stringify(data))};
   const hasI18n=S.fields.some(f=>f.t&&f.t.startsWith('i18n'));
   drawer(`<div class="dh"><span class="logo" style="width:36px;height:36px;border-radius:11px"><svg class="i" style="color:#fff;width:18px"><use href="#i-${S.icon}"/></svg></span><h2>${isNew?'Nouveau · '+S.one:esc(fr(data.title)||data.name||fr(data.q)||'Modifier')}</h2><button class="iconbtn" data-close aria-label="Fermer"><svg class="i"><use href="#i-x"/></svg></button></div>
-   <form class="db" id="edForm" novalidate>${hasI18n?`<div class="langtabs" id="lt">${[['fr','Français'],['en','English'],['ar','العربية']].map(([k,l])=>`<button type="button" data-l="${k}" class="${k==='fr'?'on':''}">${l}</button>`).join('')}</div>`:''}
+   <form class="db" id="edForm" novalidate>${hasI18n?`<div class="langtabs" id="lt">${[['fr','Français'],['en','English'],['ar','العربية']].map(([k,l])=>`<button type="button" data-l="${k}" class="${k==='fr'?'on':''}">${l}</button>`).join('')}</div><div class="autotr"><label class="tg"><input type="checkbox" id="atr" ${LS.get(TR_KEY)==='0'?'':'checked'}>Remplir l'anglais et l'arabe automatiquement à l'enregistrement</label><button type="button" class="btn sm" id="trNow">Traduire maintenant</button></div>`:''}
     <div class="fgrid">${S.fields.map(fieldHTML).join('')}</div></form>
    <div class="df">${isNew?'':'<button class="btn danger sp" data-del><svg class="i"><use href="#i-trash"/></svg>Supprimer</button>'}<button class="btn" data-close>Annuler</button><button class="btn pri" data-save><svg class="i"><use href="#i-check"/></svg>${isNew?'Créer':'Enregistrer'}</button></div>`);
   const d=$('#drawer');bindFields(d);Files.hydrate(d);markLangs();
+  const atr=d.querySelector('#atr');if(atr)atr.onchange=()=>LS.set(TR_KEY,atr.checked?'1':'0');
+  const trb=d.querySelector('#trNow');if(trb)trb.onclick=async()=>{collect(d);trb.disabled=true;trb.textContent='Traduction…';try{await autoTranslate(S,ed.data,ed.orig,true);showLang(d);toast('Traduit en anglais et en arabe. Vérifie les onglets English et العربية.')}catch(e){toast('Traduction automatique indisponible pour le moment')}trb.disabled=false;trb.textContent='Traduire maintenant'};
   d.querySelectorAll('#lt [data-l]').forEach(b=>b.onclick=()=>{collect(d);ed.lang=b.dataset.l;d.querySelectorAll('#lt [data-l]').forEach(x=>x.classList.toggle('on',x===b));
     d.querySelectorAll('[data-i18n]').forEach(inp=>{const v=ed.data[inp.dataset.i18n]||{};inp.value=v[ed.lang]||'';inp.dir=ed.lang==='ar'?'rtl':'ltr';inp.classList.toggle('ar',ed.lang==='ar')})});
   d.querySelector('[data-save]').onclick=async()=>{collect(d);const errs=validate(S,ed.data);d.querySelectorAll('.err').forEach(x=>x.textContent='');
     if(errs.length){errs.forEach(([k,m])=>{const e=d.querySelector(`[data-err="${k}"]`);if(e)e.textContent=m});toast('Complète les champs obligatoires');return}
+    const at=d.querySelector('#atr');if(at&&at.checked){const sb=d.querySelector('[data-save]');sb.disabled=true;toast('Traduction en anglais et en arabe…');try{await autoTranslate(S,ed.data,ed.orig,false)}catch(e){toast("Traduction indisponible : l'app affichera le français dans les autres langues")}sb.disabled=false}
     const rec2={...ed.data};
     if(c==='notifs'){if(rec2.send&&!rec2.sentAt)rec2.sentAt=nowISO();delete rec2.send}
     if(c==='forms')rec2.fields=(rec2.fields||[]).map(f=>({...f,id:f.id||slug(f.label).slice(0,24)||uid('q')}));
@@ -870,6 +879,22 @@ function openEditor(c,rec){
   const del=d.querySelector('[data-del]');if(del)del.onclick=async()=>{if(await confirmBox('Supprimer cet élément ?','Cette action est définitive.')){await Store.del(c,ed.data.id).catch(()=>{});closeAll();toast('Supprimé')}};
 }
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+/* traduction automatique français -> anglais / arabe */
+const TR_KEY='incubo:autotr';
+async function trGtx(t,tl){const r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=fr&tl='+tl+'&dt=t&q='+encodeURIComponent(t));if(!r.ok)throw new Error('gtx '+r.status);const j=await r.json();return (j[0]||[]).map(x=>x[0]).join('')}
+async function trMM(t,tl){const j=await (await fetch('https://api.mymemory.translated.net/get?langpair=fr|'+tl+'&q='+encodeURIComponent(t.slice(0,480)))).json();if(+j.responseStatus!==200)throw new Error(j.responseDetails);return j.responseData.translatedText}
+async function trPiece(t,tl){try{return await trGtx(t,tl)}catch(e){return await trMM(t,tl)}}
+async function translateText(text,tl){const paras=String(text).split(/\n\s*\n/);const out=[];
+  for(const p of paras){if(!p.trim()){out.push('');continue}
+    const parts=p.length<=1500?[p]:p.match(/[^.!?]+[.!?]*\s*/g).reduce((a,x)=>{if(a.length&&(a[a.length-1]+x).length<=1500)a[a.length-1]+=x;else a.push(x);return a},[]);
+    let r='';for(const x of parts)r+=await trPiece(x,tl);out.push(r.trim())}
+  return out.join('\n\n')}
+async function autoTranslate(S,data,orig,force){const jobs=[];
+  S.fields.forEach(f=>{if(!(f.t&&f.t.startsWith('i18n')))return;const v=data[f.k];if(!v||!String(v.fr||'').trim())return;const o=(orig&&orig[f.k])||{};
+    ['en','ar'].forEach(l=>{const frChanged=(o.fr||'')!==v.fr,edited=(o[l]||'')!==(v[l]||'');
+      if(force||!String(v[l]||'').trim()||(frChanged&&!edited))jobs.push(translateText(v.fr,l).then(t=>{v[l]=t}))})});
+  await Promise.all(jobs);markLangs()}
+function showLang(d){d.querySelectorAll('[data-i18n]').forEach(inp=>{const v=ed.data[inp.dataset.i18n]||{};inp.value=v[ed.lang]||''})}
 function validate(S,data){const e=[];S.fields.forEach(f=>{if(!f.req)return;const v=data[f.k];
   if(f.t&&f.t.startsWith('i18n')){if(!v||!String(v.fr||'').trim())e.push([f.k,'Obligatoire en français.'])}else if(v===undefined||v===null||String(v).trim()==='')e.push([f.k,'Champ obligatoire.'])});return e}
 function markLangs(){const d=$('#drawer');const S=SCH[ed.c];['en','ar'].forEach(l=>{const miss=S.fields.some(f=>f.t&&f.t.startsWith('i18n')&&ed.data[f.k]&&String(ed.data[f.k].fr||'').trim()&&!String(ed.data[f.k][l]||'').trim());const b=d.querySelector(`#lt [data-l="${l}"]`);if(b)b.classList.toggle('miss',miss)})}
@@ -1111,7 +1136,7 @@ function vQuestions(el){
    <div class="fld"><label for="qr">Ta réponse</label><textarea class="f" id="qr" rows="6" placeholder="Écris une réponse claire et courte…">${esc(sel.reply||'')}</textarea></div>
    <div class="row"><button class="btn danger" data-del><svg class="i"><use href="#i-trash"/></svg></button><button class="btn" data-faq><svg class="i"><use href="#i-help"/></svg>Ajouter à la FAQ</button><button class="btn pri" data-ok style="margin-inline-start:auto"><svg class="i"><use href="#i-send"/></svg>${sel.status==='ok'?'Mettre à jour la réponse':'Publier la réponse'}</button></div>`;
   qd.querySelector('[data-ok]').onclick=async()=>{const r=qd.querySelector('#qr').value.trim();if(!r)return toast('Écris une réponse');await Store.put('questions',{...sel,reply:r,status:'ok',answeredAt:nowISO()}).catch(()=>{});toast("Réponse publiée dans l'app")};
-  qd.querySelector('[data-faq]').onclick=async()=>{const r=qd.querySelector('#qr').value.trim();if(!r)return toast("Écris d'abord une réponse");await Store.put('faq',{q:{fr:sel.text,en:'',ar:''},a:{fr:r,en:'',ar:''},order:Store.list('faq').length}).catch(()=>{});toast('Ajoutée à la FAQ (pense aux traductions)')};
+  qd.querySelector('[data-faq]').onclick=async()=>{const r=qd.querySelector('#qr').value.trim();if(!r)return toast("Écris d'abord une réponse");const fq={q:{fr:sel.text,en:'',ar:''},a:{fr:r,en:'',ar:''},order:Store.list('faq').length};if(LS.get(TR_KEY)!=='0')await autoTranslate(SCH.faq,fq,null,false).catch(()=>{});await Store.put('faq',fq).catch(()=>{});toast('Ajoutée à la FAQ (pense aux traductions)')};
   qd.querySelector('[data-del]').onclick=async()=>{if(await confirmBox('Supprimer cette question ?','Cette action est définitive.')){await Store.del('questions',sel.id).catch(()=>{});st.sel=null;toast('Question supprimée')}};
 }
 
@@ -1146,7 +1171,7 @@ function vSettings(el){
   el.querySelector('#cf').onsubmit=async e=>{e.preventDefault();const o={...c,id:'contact'};el.querySelectorAll('[data-c]').forEach(i=>o[i.dataset.c]=i.value.trim());await Store.put('settings',o).catch(()=>{});toast('Coordonnées enregistrées')};
   el.querySelector('#pf2').onsubmit=async e=>{e.preventDefault();const u=el.querySelector('#p_u').value.trim().toLowerCase(),o=el.querySelector('#p_o').value,n=el.querySelector('#p_n').value,cc=el.querySelector('#p_c').value,er=el.querySelector('#p_e');er.textContent='';
     if(Store.mode==='supa'){if(n.length<8){er.textContent='Le nouveau mot de passe doit contenir au moins 8 caractères.';return}if(n!==cc){er.textContent='Les deux mots de passe ne correspondent pas.';return}
-      const {error:e1}=await Store.sb.auth.signInWithPassword({email:u,password:o});if(e1){er.textContent='E-mail ou mot de passe actuel incorrect.';return}
+      const C=CFG(),tmp=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey,{auth:{persistSession:false,autoRefreshToken:false,storageKey:'incubo-verif'}});const {error:e1}=await tmp.auth.signInWithPassword({email:u,password:o});if(e1){er.textContent='E-mail ou mot de passe actuel incorrect.';return}await tmp.auth.signOut({scope:'local'}).catch(()=>{});
       const {error:e2}=await Store.sb.auth.updateUser({password:n});if(e2){er.textContent=e2.message;return}e.target.reset();toast('Mot de passe modifié');return}
     if(await sha(u+'|'+o)!==authHash()){er.textContent='Identifiant ou mot de passe actuel incorrect.';return}
     if(n.length<8){er.textContent='Le nouveau mot de passe doit contenir au moins 8 caractères.';return}if(n!==cc){er.textContent='Les deux mots de passe ne correspondent pas.';return}
@@ -1200,6 +1225,13 @@ function enter(){$('#login').hidden=true;$('#shell').hidden=false;
 bootStore().then(()=>{if(Store.mode==='supa'){$('label[for="lgUser"]').textContent='E-mail';$('#lgUser').placeholder='admin@exemple.dz';$('#lgUser').type='email';if(Store.loaded)enter()}});
 if(sessionOk()){$('#loading').hidden=false;bootStore().then(()=>{$('#loading').hidden=true;sessionOk()?enter():null})}
 })();
+
+/* thème clair / sombre */
+function themeIsDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches}
+function themeIcon(){const b=document.getElementById('btnTheme');if(!b)return;const d=themeIsDark();b.querySelector('use').setAttribute('href',d?'#i-sun':'#i-moon');b.setAttribute('aria-label',d?'Mode clair':'Mode sombre');b.title=d?'Mode clair':'Mode sombre'}
+function toggleTheme(){const t=themeIsDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('incubo:theme',t)}catch(e){}themeIcon();const m=document.querySelector('meta[name="theme-color"]');if(m&&m.dataset.light)m.content=t==='dark'?m.dataset.dark:m.dataset.light}
+document.getElementById('btnTheme').onclick=toggleTheme;themeIcon();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',themeIcon);
+(function(){const m=document.querySelector('meta[name="theme-color"]');if(m&&m.dataset.light&&themeIsDark())m.content=m.dataset.dark})();
 </script>
 
 </body>
